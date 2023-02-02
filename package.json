@@ -1,9 +1,9 @@
 {
   "private": true,
-  "name": "Chat-app",
-  "description": "My application description",
+  "name": "chat-app",
+  "description": "chat application ",
   "version": "1.0.0",
-  "author": "Yoshihide Shiono <shiono.yoshihide@gmail.com>",
+  "author": "songdam han <herb7761@gmail.com>",
   "main": "app/background.js",
   "scripts": {
     "dev": "nextron",
@@ -13,7 +13,10 @@
   "dependencies": {
     "electron-serve": "^1.1.0",
     "electron-store": "^8.1.0",
-    "react-hook-form": "^7.43.0"
+    "firebase": "^9.16.0",
+    "react-hook-form": "^7.43.0",
+    "recoil": "^0.7.6",
+    "recoil-persist": "^4.2.0"
   },
   "devDependencies": {
     "@emotion/babel-plugin": "^11.10.2",

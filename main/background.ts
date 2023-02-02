@@ -2,6 +2,8 @@ import { app } from 'electron';
 import serve from 'electron-serve';
 import { createWindow } from './helpers';
 
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
 if (isProd) {
@@ -22,7 +24,7 @@ if (isProd) {
     await mainWindow.loadURL('app://./home.html');
   } else {
     const port = process.argv[2];
-    await mainWindow.loadURL(`http://localhost:${port}/signIn`);
+    await mainWindow.loadURL(`http://localhost:${port}/signin`);
     mainWindow.webContents.openDevTools();
   }
 })();

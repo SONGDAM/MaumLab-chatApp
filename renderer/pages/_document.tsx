@@ -1,23 +1,27 @@
 import React from 'react';
-import Document, { Html, Head, Main, NextScript } from 'next/document';
+// import Document, { Html, Head, Main, NextScript } from 'next/document';
+import { Html, Head, Main, NextScript } from 'next/document';
 import { css, Global } from '@emotion/react';
 import { globalStyle } from '../style/globalStyle';
 
-class MyDocument extends Document {
-  render() {
-    return (
-      <Html lang='en'>
-        <Head>
-          <meta charSet='utf-8' />
-        </Head>
-        <Global styles={globalStyle} />
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
+function Document() {
+  return (
+    <Html lang='en'>
+      <Head>
+        <meta charSet='utf-8' />
+        <link
+          rel='stylesheet'
+          as='style'
+          href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css'
+        />
+      </Head>
+      <Global styles={globalStyle} />
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
 }
 
-export default MyDocument;
+export default Document;

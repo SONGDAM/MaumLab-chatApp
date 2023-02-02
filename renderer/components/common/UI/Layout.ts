@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-export const Layout = styled.div`
+export const FlexCenterLayout = styled.div`
   display: flex;
   flex-flow: column wrap;
   justify-content: center;

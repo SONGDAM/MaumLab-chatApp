@@ -1,28 +1,108 @@
 import styled from '@emotion/styled';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Layout } from '../components/common/Layout';
-import { CustomInput } from '../components/common/CustomInput';
-import { CustomButton } from '../components/common/CustomButton';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { auth } from '../firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { SetterOrUpdater, useRecoilValue, useSetRecoilState } from 'recoil';
+import { UserProps } from '../types/UserProps';
+
+import { FlexCenterLayout } from '../components/common/UI/Layout';
+import { CustomInput } from '../components/common/UI/CustomInput';
+import { CustomButton } from '../components/common/UI/CustomButton';
+import { CustomForm } from '../components/common/UI/CustomForm';
+import { ErrorMessage } from '../components/common/UI/ErrorMessage';
+import { NextRouter, useRouter } from 'next/router';
+import { userState } from '../atom/userState';
 
 function SignIn() {
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const setUserEmail: SetterOrUpdater<string> = useSetRecoilState(userState);
+  const userEmail: string = useRecoilValue<string>(userState);
+  const router: NextRouter = useRouter();
+
+  // useEffect(() => {
+  //   if (userEmail) {
+  //     router.push('/home');
+  //   }
+  // }, []);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UserProps>();
+
+  const onSubmit: SubmitHandler<UserProps> = async (userCredential) => {
+    try {
+      const response = await signInWithEmailAndPassword(auth, userCredential.email, userCredential.password);
+      const { email } = response.user;
+
+      if (email) {
+        router.push('/home');
+        console.log(email);
+        setUserEmail(email);
+
+        return;
+      }
+    } catch (error) {
+      switch (error.code) {
+        case 'auth/user-not-found':
+          setErrorMessage('유저를 찾을 수 없습니다.');
+          break;
+        case 'auth/wrong-password':
+          setErrorMessage('아이디와 비밀번호를 확인해주세요.');
+          break;
+      }
+    }
+  };
+
   return (
     <SignInLayout>
       <Title>MaumLab-ChatApp</Title>
 
-      <CustomInput placeholder='이메일' />
-      <CustomInput placeholder='비밀번호' />
+      <CustomForm onSubmit={handleSubmit(onSubmit)}>
+        <CustomInput
+          placeholder='이메일'
+          {...register('email', {
+            required: true,
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: '올바르지 않은 이메일 주소입니다',
+            },
+          })}
+        />
 
-      <CustomButton>로그인</CustomButton>
+        <CustomInput
+          type={'password'}
+          placeholder='비밀번호'
+          {...register('password', {
+            required: true,
+            maxLength: 20,
+            pattern: {
+              value: /^[A-Za-z0-9]{6,12}$/,
+              message: '올바르지 않은 비밀번호 구성입니다.',
+            },
+          })}
+        />
 
-      <Link href={'/signUp'}>
+        {errors.email && <ErrorMessage>올바르지 않은 이메일 주소입니다.</ErrorMessage>}
+        <ErrorMessage>{errorMessage}</ErrorMessage>
+
+        <CustomButton type='submit'>로그인</CustomButton>
+      </CustomForm>
+      <Link href={'/signup'}>
         <SignUpComment>아직 계정이 없으신가요? 회원가입하기</SignUpComment>
       </Link>
     </SignInLayout>
   );
 }
 
-const SignInLayout = styled(Layout)`
+// const SignInLayout = styled(FlexCenterLayout)`
+//   gap: 1rem;
+// `;
+
+const SignInLayout = styled(FlexCenterLayout)`
   gap: 1rem;
 `;
 
