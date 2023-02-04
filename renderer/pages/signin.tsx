@@ -13,12 +13,9 @@ import { CustomButton } from '../components/common/UI/CustomButton';
 import { CustomForm } from '../components/common/UI/CustomForm';
 import { ErrorMessage } from '../components/common/UI/ErrorMessage';
 import { NextRouter, useRouter } from 'next/router';
-import { userState } from '../atom/userState';
 
 function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const setUserEmail: SetterOrUpdater<string> = useSetRecoilState(userState);
-  const userEmail: string = useRecoilValue<string>(userState);
   const router: NextRouter = useRouter();
 
   // useEffect(() => {
@@ -40,9 +37,6 @@ function SignIn() {
 
       if (email) {
         router.push('/home');
-        console.log(email);
-        setUserEmail(email);
-
         return;
       }
     } catch (error) {

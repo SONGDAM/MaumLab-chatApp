@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
-import { color } from './color';
+import { colorPalatte } from './color';
 
 export const CustomButton = styled.button`
   margin-bottom: 1rem;
   border: none;
-  background-color: ${color.primary};
+  background-color: ${colorPalatte.primary};
   color: #fff;
   width: 22rem;
   height: 3rem;
