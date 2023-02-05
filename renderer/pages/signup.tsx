@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import styled from '@emotion/styled';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from 'firebase/auth';
+import {
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  inMemoryPersistence,
+  setPersistence,
+  signInWithEmailAndPassword,
+  UserCredential,
+} from 'firebase/auth';
 import { auth, database } from '../firebaseConfig';
 import Swal from 'sweetalert2';
 
@@ -29,13 +36,18 @@ function SignUp() {
 
   const onSubmit: SubmitHandler<SignUpProps> = async (userCredential) => {
     try {
-      await createUserWithEmailAndPassword(auth, userCredential.email, userCredential.password);
+      const signUpResponse = await createUserWithEmailAndPassword(auth, userCredential.email, userCredential.password);
 
       await addDoc(collection(database, 'users'), {
         name: userCredential.name,
         email: userCredential.email,
         profilePicPath: 'https://api.lorem.space/image/face?w=150&h=220',
+        uid: signUpResponse.user.uid,
       });
+
+      //TODO : login persistence
+
+      await setPersistence(auth, browserLocalPersistence);
 
       await signInWithEmailAndPassword(auth, userCredential.email, userCredential.password);
 
@@ -43,7 +55,6 @@ function SignUp() {
         icon: 'success',
         title: '회원가입이 완료되었습니다',
         showConfirmButton: true,
-        timer: 1500,
       });
 
       if (signUpSuccessModal.isConfirmed) {

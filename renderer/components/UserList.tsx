@@ -11,15 +11,27 @@ import {
   Unsubscribe,
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { globalUserState } from '../states/globalUserState';
+
 import { type HandleChatRoomCreate } from '../types/HandleChatRoomCreate';
 import Image from 'next/image';
-
 import { auth, database } from '../firebaseConfig';
-import { UserProps } from '../types/UserProps';
 import { FlexCenterLayout } from './common/UI/Layout';
+import { onAuthStateChanged } from 'firebase/auth';
 
 function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
-  const [userList, setUserList] = useState<UserProps[]>([]);
+  const [userList, setUserList] = useState([]);
+
+  const uid = auth?.currentUser?.uid;
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log(user);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const userQuery: Query<DocumentData> = query(collection(database, 'users'), orderBy('name'), limit(50));
@@ -31,21 +43,23 @@ function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
         users.push({ ...doc.data(), id: doc.id });
       });
 
-      setUserList(users);
+      const filteredUserList = users.filter((it) => it.uid !== uid);
+
+      setUserList(filteredUserList);
     });
 
     return () => {
       unsubscribe();
-      console.log('component unmounted');
     };
   }, []);
 
   return (
     <>
       <Title>친구</Title>
+
       <UserListLayout>
         {userList.map((it) => (
-          <UserListItem key={it.id} onClick={() => handleChatRoomCreate(it.id)}>
+          <UserListItem key={it.id} onClick={() => handleChatRoomCreate(it.uid, uid)}>
             <Image src={it.profilePicPath} alt='user profile picture' width={50} height={80} quality={80} />
             <UserName>{it.name}</UserName>
           </UserListItem>

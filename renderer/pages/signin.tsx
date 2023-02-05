@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { auth } from '../firebaseConfig';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { inMemoryPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
 import { SetterOrUpdater, useRecoilValue, useSetRecoilState } from 'recoil';
-import { UserProps } from '../types/UserProps';
+import { SignUpProps, UserProps } from '../types/UserProps';
 
 import { FlexCenterLayout } from '../components/common/UI/Layout';
 import { CustomInput } from '../components/common/UI/CustomInput';
@@ -28,16 +28,16 @@ function SignIn() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<UserProps>();
+  } = useForm<SignUpProps>();
 
-  const onSubmit: SubmitHandler<UserProps> = async (userCredential) => {
+  const onSubmit: SubmitHandler<SignUpProps> = async (userCredential) => {
     try {
-      const response = await signInWithEmailAndPassword(auth, userCredential.email, userCredential.password);
-      const { email } = response.user;
+      await setPersistence(auth, inMemoryPersistence);
 
-      if (email) {
+      const signInResponse = await signInWithEmailAndPassword(auth, userCredential.email, userCredential.password);
+
+      if (signInResponse) {
         router.push('/home');
-        return;
       }
     } catch (error) {
       switch (error.code) {

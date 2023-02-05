@@ -23,13 +23,13 @@ import { ChatMessageProps } from '../types/ChatMessageProps';
 
 function ChatRoom({ chatMember }) {
   const [lastMessage, setLastMessage] = useState<ChatMessageProps[]>([]);
-  const [chatMessage, setChatMessage] = useState<string>('');
+  const [typedMessage, setTypedMessage] = useState<string>('');
 
-  const { uid } = auth?.currentUser;
+  const uid = auth?.currentUser?.uid;
 
   useEffect(() => {
     const messageQuery: Query<DocumentData> = query(
-      collection(database, 'privatechat'),
+      collection(database, `message=${chatRoomName}`),
       orderBy('createdAt'),
       limit(50)
     );
@@ -47,45 +47,61 @@ function ChatRoom({ chatMember }) {
     return () => unsubscribe();
   }, []);
 
+  const chatRoomName = chatMember.sort().join('');
+
+  // const createChatRoom = async (): Promise<void> => {
+  //   console.log(`chatRoom has created`);
+
+  //   await addDoc(collection(database, 'privatechat'), {
+  //     name: chatMemeber[0].name,
+  //     createdAt: serverTimestamp(),
+  //     member: chatMember,
+  //     lastMessage: typedMessage,
+  //   });
+  // };
+
   const handleMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setChatMessage(e.target.value);
+    setTypedMessage(e.target.value);
   };
 
   const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (chatMessage.trim() === '') {
+    if (typedMessage.trim() === '') {
       Swal.fire({
         icon: 'warning',
         title: '메시지를 입력해주세요',
         timer: 1500,
       });
+
       return;
     }
 
-    await addDoc(collection(database, 'privatechat'), {
-      text: chatMessage,
+    await addDoc(collection(database, `message=${chatRoomName}`), {
+      text: typedMessage,
       createdAt: serverTimestamp(),
-      uid,
+      member: chatMember,
+      own: uid,
     });
 
-    setChatMessage('');
+    setTypedMessage('');
   };
+
+  const otherUserMessage = lastMessage
+    .filter((it) => it.own !== uid)
+    .map((it) => <SideChatBox key={it.uid}>{it.text}</SideChatBox>);
+
+  const currentUserMessage = lastMessage
+    .filter((it) => it.own === uid)
+    .map((it) => <ChatBox key={it.uid}>{it.text}</ChatBox>);
 
   return (
     <FlexCenterLayout>
       <ChatRoomHeader />
 
       <ChatRoomMessage>
-        <SideChatBoxWrapper>
-          <SideChatBox>gkgkk</SideChatBox>
-        </SideChatBoxWrapper>
-
-        <ChatBoxWrapper>
-          {lastMessage.map((it, i) => (
-            <ChatBox key={i}>{it.text}</ChatBox>
-          ))}
-        </ChatBoxWrapper>
+        <SideChatBoxWrapper>{otherUserMessage}</SideChatBoxWrapper>
+        <ChatBoxWrapper>{currentUserMessage}</ChatBoxWrapper>
       </ChatRoomMessage>
       <ChatMessageInput handleMessage={handleMessage} sendMessage={sendMessage} />
     </FlexCenterLayout>
@@ -111,7 +127,7 @@ const SideChatBoxWrapper = styled.div`
 `;
 
 const ChatBox = styled.div`
-  margin-bottom: 2.2rem;
+  margin-bottom: 1rem;
   padding: 0.4rem 0.625rem 1.4rem 0.625rem;
   width: fit-content;
   height: 2rem;

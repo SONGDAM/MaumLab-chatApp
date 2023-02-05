@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useState } from 'react';
 import { CustomButton } from './common/UI/CustomButton';
 import { CustomForm } from './common/UI/CustomForm';
 
@@ -9,7 +10,7 @@ interface ChatInputProps {
 
 function ChatMessageInput({ handleMessage, sendMessage }: ChatInputProps) {
   return (
-    <CustomForm onSubmit={sendMessage}>
+    <CustomForm onSubmit={sendMessage} defaultValue={''}>
       <ChatInputWrapper>
         <ChatInput onChange={handleMessage} />
         <SubmitButton type={'submit'}>전송</SubmitButton>

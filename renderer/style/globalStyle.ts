@@ -10,7 +10,7 @@ export const globalStyle = css`
   body {
     height: 100%;
     font-family: Pretendard;
-    overflow-y: hidden;
+    overflow: hidden;
   }
 
   div,
