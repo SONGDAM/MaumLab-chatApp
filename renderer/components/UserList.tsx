@@ -11,17 +11,16 @@ import {
   Unsubscribe,
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { globalUserState } from '../states/globalUserState';
 
 import { type HandleChatRoomCreate } from '../types/HandleChatRoomCreate';
 import Image from 'next/image';
 import { auth, database } from '../firebaseConfig';
 import { FlexCenterLayout } from './common/UI/Layout';
 import { onAuthStateChanged } from 'firebase/auth';
+import { UserProps } from '../types/UserProps';
 
 function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
-  const [userList, setUserList] = useState([]);
+  const [userList, setUserList] = useState<Array<UserProps>>([]);
 
   const uid = auth?.currentUser?.uid;
 

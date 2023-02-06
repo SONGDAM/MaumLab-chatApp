@@ -1,11 +1,10 @@
 import styled from '@emotion/styled';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { auth } from '../firebaseConfig';
 import { inMemoryPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
-import { SetterOrUpdater, useRecoilValue, useSetRecoilState } from 'recoil';
-import { SignUpProps, UserProps } from '../types/UserProps';
+import { SignUpProps } from '../types/UserProps';
 
 import { FlexCenterLayout } from '../components/common/UI/Layout';
 import { CustomInput } from '../components/common/UI/CustomInput';

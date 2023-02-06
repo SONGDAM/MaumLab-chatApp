@@ -9,6 +9,7 @@ import {
   orderBy,
   Query,
   query,
+  QuerySnapshot,
   serverTimestamp,
   Unsubscribe,
 } from 'firebase/firestore';
@@ -20,21 +21,30 @@ import { FlexCenterLayout } from '../components/common/UI/Layout';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import ChatMessageInput from '../components/ChatMessageInput';
 import { ChatMessageProps } from '../types/ChatMessageProps';
+import { UserProps } from '../types/UserProps';
 
-function ChatRoom({ chatMember }) {
+interface ChatRoomProps {
+  chatMember: UserProps[];
+}
+
+function ChatRoom({ chatMember }: ChatRoomProps) {
   const [lastMessage, setLastMessage] = useState<ChatMessageProps[]>([]);
   const [typedMessage, setTypedMessage] = useState<string>('');
 
   const uid = auth?.currentUser?.uid;
 
   useEffect(() => {
+    const chatRoomName: string = chatMember.sort().join('');
+
+    console.log(`chatRoomName`, chatRoomName);
+
     const messageQuery: Query<DocumentData> = query(
       collection(database, `message=${chatRoomName}`),
       orderBy('createdAt'),
       limit(50)
     );
 
-    const unsubscribe: Unsubscribe = onSnapshot(messageQuery, (QuerySnapshot) => {
+    const unsubscribe: Unsubscribe = onSnapshot(messageQuery, (QuerySnapshot: QuerySnapshot) => {
       const messages = [];
 
       QuerySnapshot.forEach((doc) => {
@@ -45,27 +55,15 @@ function ChatRoom({ chatMember }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [chatMember]);
 
-  const chatRoomName = chatMember.sort().join('');
-
-  // const createChatRoom = async (): Promise<void> => {
-  //   console.log(`chatRoom has created`);
-
-  //   await addDoc(collection(database, 'privatechat'), {
-  //     name: chatMemeber[0].name,
-  //     createdAt: serverTimestamp(),
-  //     member: chatMember,
-  //     lastMessage: typedMessage,
-  //   });
-  // };
-
-  const handleMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleMessage = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setTypedMessage(e.target.value);
   };
 
-  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+  const sendMessage = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+    console.log(typedMessage);
 
     if (typedMessage.trim() === '') {
       Swal.fire({
@@ -77,7 +75,7 @@ function ChatRoom({ chatMember }) {
       return;
     }
 
-    await addDoc(collection(database, `message=${chatRoomName}`), {
+    await addDoc(collection(database, `message=${chatMember.sort().join('')}`), {
       text: typedMessage,
       createdAt: serverTimestamp(),
       member: chatMember,
@@ -89,22 +87,29 @@ function ChatRoom({ chatMember }) {
 
   const otherUserMessage = lastMessage
     .filter((it) => it.own !== uid)
-    .map((it) => <SideChatBox key={it.uid}>{it.text}</SideChatBox>);
+    .map((it) => <SideChatBox key={it.id}>{it.text}</SideChatBox>);
 
   const currentUserMessage = lastMessage
     .filter((it) => it.own === uid)
-    .map((it) => <ChatBox key={it.uid}>{it.text}</ChatBox>);
+    .map((it) => <ChatBox key={it.id}>{it.text}</ChatBox>);
+
+  console.log(`chatMember`, chatMember);
+  console.log(`chatMember`, chatMember);
+  console.log(`otherUserMessage`, otherUserMessage);
+  console.log(`currentUserMessage`, currentUserMessage);
 
   return (
-    <FlexCenterLayout>
-      <ChatRoomHeader />
+    <>
+      <FlexCenterLayout>
+        <ChatRoomHeader />
 
-      <ChatRoomMessage>
-        <SideChatBoxWrapper>{otherUserMessage}</SideChatBoxWrapper>
-        <ChatBoxWrapper>{currentUserMessage}</ChatBoxWrapper>
-      </ChatRoomMessage>
-      <ChatMessageInput handleMessage={handleMessage} sendMessage={sendMessage} />
-    </FlexCenterLayout>
+        <ChatRoomMessage>
+          <SideChatBoxWrapper>{otherUserMessage}</SideChatBoxWrapper>
+          <ChatBoxWrapper>{currentUserMessage}</ChatBoxWrapper>
+        </ChatRoomMessage>
+        <ChatMessageInput handleMessage={handleMessage} sendMessage={sendMessage} />
+      </FlexCenterLayout>
+    </>
   );
 }
 

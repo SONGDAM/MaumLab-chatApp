@@ -1,9 +1,9 @@
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { NextRouter, useRouter } from 'next/router';
 import styled from '@emotion/styled';
 import { FlexCenterLayout } from '../components/common/UI/Layout';
-import { auth, database } from '../firebaseConfig';
+import { auth } from '../firebaseConfig';
 import ChatRoom from './[id]';
 import UserList from '../components/UserList';
 // import { addDoc, collection } from 'firebase/firestore';
@@ -13,7 +13,7 @@ import UserList from '../components/UserList';
 import { onAuthStateChanged } from 'firebase/auth';
 
 function Home() {
-  const [isChatRoomCreate, setIsChatRoomCreate] = useState<boolean>(false);
+  const [, setIsChatRoomCreate] = useState<boolean>(false);
   const [chatMember, setChatMember] = useState([]);
 
   const router: NextRouter = useRouter();
@@ -24,7 +24,7 @@ function Home() {
         router.push('/signin');
       }
     });
-  }, []);
+  }, [router]);
 
   const handleChatRoomCreate = (id: string, currentMember: string): void => {
     setIsChatRoomCreate(true);
