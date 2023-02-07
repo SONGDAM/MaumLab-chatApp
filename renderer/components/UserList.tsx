@@ -20,7 +20,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { UserProps } from '../types/UserProps';
 
 function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
-  const [userList, setUserList] = useState<Array<UserProps>>([]);
+  const [userList, setUserList] = useState<UserProps[]>([]);
 
   const uid = auth?.currentUser?.uid;
 
@@ -50,7 +50,7 @@ function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [uid]);
 
   return (
     <>
@@ -70,7 +70,7 @@ function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
 
 const UserListLayout = styled(FlexCenterLayout)`
   justify-content: flex-start;
-  overflow-y: scroll;
+  overflow: auto;
 `;
 
 const Title = styled.h2`

@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from 'react';
-
 import { NextRouter, useRouter } from 'next/router';
 import styled from '@emotion/styled';
 import { FlexCenterLayout } from '../components/common/UI/Layout';
 import { auth } from '../firebaseConfig';
-import ChatRoom from './[id]';
+import ChatRoom from '../components/ChatRoom';
 import UserList from '../components/UserList';
-// import { addDoc, collection } from 'firebase/firestore';
-// import { useRecoilValue } from 'recoil';
-// import { globalUserState } from '../states/globalUserState';
-// import { UserProps } from '../types/UserProps';
 import { onAuthStateChanged } from 'firebase/auth';
 
 function Home() {
   const [, setIsChatRoomCreate] = useState<boolean>(false);
-  const [chatMember, setChatMember] = useState([]);
+  const [chatMemberId, setChatMemberId] = useState([]);
 
   const router: NextRouter = useRouter();
 
@@ -28,7 +23,7 @@ function Home() {
 
   const handleChatRoomCreate = (id: string, currentMember: string): void => {
     setIsChatRoomCreate(true);
-    setChatMember([id, currentMember]);
+    setChatMemberId([id, currentMember]);
   };
 
   const signOut = () => auth.signOut();
@@ -42,7 +37,7 @@ function Home() {
         </UserMenu>
       </MenuLayout>
       <ChatRoomLayout>
-        <ChatRoom chatMember={chatMember} />
+        <ChatRoom chatMemberId={chatMemberId} />
       </ChatRoomLayout>
     </HomeLayout>
   );

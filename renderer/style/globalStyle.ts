@@ -13,6 +13,10 @@ export const globalStyle = css`
     overflow: hidden;
   }
 
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
   div,
   span,
   applet,

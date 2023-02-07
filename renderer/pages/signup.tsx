@@ -5,10 +5,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
-  inMemoryPersistence,
   setPersistence,
   signInWithEmailAndPassword,
-  UserCredential,
 } from 'firebase/auth';
 import { auth, database } from '../firebaseConfig';
 import Swal from 'sweetalert2';
