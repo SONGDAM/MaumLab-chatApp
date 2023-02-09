@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { auth, database } from '../firebaseConfig';
 import {
   addDoc,
   collection,
+  doc,
   DocumentData,
   limit,
   onSnapshot,
@@ -11,33 +12,45 @@ import {
   query,
   QuerySnapshot,
   serverTimestamp,
+  setDoc,
   Unsubscribe,
 } from 'firebase/firestore';
 import styled from '@emotion/styled';
 
 import { colorPalatte } from './common/UI/color';
-import { FlexCenterLayout } from './common/UI/Layout';
+import { FlexColmunCenter } from './common/UI/Layout';
 import ChatRoomHeader from './ChatRoomHeader';
 import ChatMessageInput from './ChatMessageInput';
 import type { ChatMessageProps } from '../types/ChatMessageProps';
 import type { UserProps } from '../types/UserProps';
-import React from 'react';
 
 interface ChatRoomProps {
-  chatMemberId: UserProps[];
+  chatMember: UserProps[];
 }
 
-function ChatRoom({ chatMemberId }: ChatRoomProps) {
+function ChatRoom({ chatMember }: ChatRoomProps) {
   const [lastMessage, setLastMessage] = useState<ChatMessageProps[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const uid: string = auth?.currentUser?.uid;
   const messageListBottomRef = useRef<HTMLDivElement>();
+  const chatRoomDatabaseName: string = chatMember
+    .map((it) => it.uid)
+    .sort()
+    .join('');
+
+  const chatRoomMemberName: string = chatMember
+    .map((it) => it.name)
+    .sort()
+    .join(',');
 
   useEffect(() => {
-    const chatRoomName: string = chatMemberId.sort().join('');
+    const chatRoomDatabaseName: string = chatMember
+      .map((it) => it.uid)
+      .sort()
+      .join('');
 
     const messageQuery: Query<DocumentData> = query(
-      collection(database, `message=${chatRoomName}`),
+      collection(database, `message=${chatRoomDatabaseName}`),
       orderBy('createdAt'),
       limit(100)
     );
@@ -53,13 +66,14 @@ function ChatRoom({ chatMemberId }: ChatRoomProps) {
     });
 
     return () => unsubscribe();
-  }, [chatMemberId]);
+  }, [chatMember]);
 
   const createChatRoom = async (): Promise<void> => {
-    await addDoc(collection(database, `chatrooms`), {
-      name: chatMemberId.sort().join(''),
+    await setDoc(doc(database, `chatrooms`, chatRoomDatabaseName), {
+      profilePicPath: chatMember[0].profilePicPath,
+      name: chatRoomMemberName,
       createdAt: serverTimestamp(),
-      member: chatMemberId,
+      member: chatMember,
       own: uid,
     });
   };
@@ -71,38 +85,36 @@ function ChatRoom({ chatMemberId }: ChatRoomProps) {
   const sendNewMessage = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    //TODO: when input is none, input is disable function is must do messageInput components
-
-    await addDoc(collection(database, `message=${chatMemberId.sort().join('')}`), {
+    await addDoc(collection(database, `message=${chatRoomDatabaseName}`), {
       text: newMessage,
       createdAt: serverTimestamp(),
-      member: chatMemberId,
+      memberName: chatRoomMemberName,
+      member: chatMember,
       own: uid,
     });
+
+    createChatRoom();
 
     setTimeout(() => {
       messageListBottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }, 100);
 
-    createChatRoom();
     setNewMessage('');
   };
 
   return (
     <>
-      <FlexCenterLayout>
-        <ChatRoomHeader />
+      <FlexColmunCenter>
+        <ChatRoomHeader chatMember={chatMember} />
         <ChatRoomMessage>
           {lastMessage.map((it) =>
             it.own === uid ? (
-              <>
-                <React.Fragment key={it.id}>
-                  <ChatBoxWrapper key={it.id}>
-                    <ChatBox> {it.text}</ChatBox>
-                  </ChatBoxWrapper>
-                  <MessageListBottom ref={messageListBottomRef} />
-                </React.Fragment>
-              </>
+              <React.Fragment key={it.id}>
+                <ChatBoxWrapper key={it.id}>
+                  <ChatBox> {it.text}</ChatBox>
+                </ChatBoxWrapper>
+                <MessageListBottom ref={messageListBottomRef} />
+              </React.Fragment>
             ) : (
               <OtherUserChatBoxWrapper key={it.id}>
                 <OtherUserChatBox key={it.id}>{it.text}</OtherUserChatBox>
@@ -110,7 +122,7 @@ function ChatRoom({ chatMemberId }: ChatRoomProps) {
             )
           )}
         </ChatRoomMessage>
-      </FlexCenterLayout>
+      </FlexColmunCenter>
       <ChatMessageInput handleNewMessage={handleNewMessage} newMessage={newMessage} sendNewMessage={sendNewMessage} />
     </>
   );

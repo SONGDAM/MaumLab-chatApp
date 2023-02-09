@@ -12,16 +12,17 @@ import {
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
-import { type HandleChatRoomCreate } from '../types/HandleChatRoomCreate';
+import { type getChatRoomMember } from '../types/HandleChatRoomCreate';
 import Image from 'next/image';
 import { auth, database } from '../firebaseConfig';
-import { FlexCenterLayout } from './common/UI/Layout';
+import { FlexColmunCenter } from './common/UI/Layout';
 import { onAuthStateChanged } from 'firebase/auth';
 import { UserProps } from '../types/UserProps';
 
-function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
-  const [userList, setUserList] = useState<UserProps[]>([]);
+import React from 'react';
 
+function UserList({ getChatRoomMember }: getChatRoomMember) {
+  const [userList, setUserList] = useState<UserProps[]>([]);
   const uid = auth?.currentUser?.uid;
 
   useEffect(() => {
@@ -42,9 +43,7 @@ function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
         users.push({ ...doc.data(), id: doc.id });
       });
 
-      const filteredUserList = users.filter((it) => it.uid !== uid);
-
-      setUserList(filteredUserList);
+      setUserList(users);
     });
 
     return () => {
@@ -52,25 +51,32 @@ function UserList({ handleChatRoomCreate }: HandleChatRoomCreate) {
     };
   }, [uid]);
 
+  const currentUser = userList.find((u) => u.uid === uid);
+
   return (
     <>
       <Title>친구</Title>
 
       <UserListLayout>
-        {userList.map((it) => (
-          <UserListItem key={it.id} onClick={() => handleChatRoomCreate(it.uid, uid)}>
-            <Image src={it.profilePicPath} alt='user profile picture' width={50} height={80} quality={80} />
-            <UserName>{it.name}</UserName>
-          </UserListItem>
-        ))}
+        {userList
+          .filter((user) => user.uid !== uid)
+          .map((it) => (
+            <React.Fragment key={it.uid}>
+              <UserListItem onClick={() => getChatRoomMember(it, currentUser)}>
+                <Image src={it.profilePicPath} alt='user profile picture' width={50} height={80} quality={80} />
+                <UserName>{it.name}</UserName>
+              </UserListItem>
+            </React.Fragment>
+          ))}
       </UserListLayout>
     </>
   );
 }
 
-const UserListLayout = styled(FlexCenterLayout)`
+const UserListLayout = styled(FlexColmunCenter)`
+  position: fixed;
   justify-content: flex-start;
-  overflow: auto;
+  overflow-y: scroll;
 `;
 
 const Title = styled.h2`
@@ -84,7 +90,7 @@ const Title = styled.h2`
 const UserListItem = styled.div`
   display: flex;
   gap: 4rem;
-  padding: 1rem 2rem 1rem 2rem;
+  padding: 1rem 0 1rem 2rem;
   width: 16rem;
   height: 5rem;
   border-bottom: 1px solid #e0e0e0;

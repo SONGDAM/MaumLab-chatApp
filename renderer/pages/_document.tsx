@@ -1,7 +1,7 @@
 import React from 'react';
 // import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { Html, Head, Main, NextScript } from 'next/document';
-import { css, Global } from '@emotion/react';
+import { Global } from '@emotion/react';
 import { globalStyle } from '../style/globalStyle';
 
 function Document() {
@@ -17,6 +17,7 @@ function Document() {
       </Head>
       <Global styles={globalStyle} />
       <body>
+        <div id='modal' />
         <Main />
         <NextScript />
       </body>

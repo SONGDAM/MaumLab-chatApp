@@ -6,7 +6,7 @@ import { auth } from '../firebaseConfig';
 import { inMemoryPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
 import { SignUpProps } from '../types/UserProps';
 
-import { FlexCenterLayout } from '../components/common/UI/Layout';
+import { FlexColmunCenter } from '../components/common/UI/Layout';
 import { CustomInput } from '../components/common/UI/CustomInput';
 import { CustomButton } from '../components/common/UI/CustomButton';
 import { CustomForm } from '../components/common/UI/CustomForm';
@@ -16,12 +16,6 @@ import { NextRouter, useRouter } from 'next/router';
 function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const router: NextRouter = useRouter();
-
-  // useEffect(() => {
-  //   if (userEmail) {
-  //     router.push('/home');
-  //   }
-  // }, []);
 
   const {
     register,
@@ -91,11 +85,11 @@ function SignIn() {
   );
 }
 
-// const SignInLayout = styled(FlexCenterLayout)`
+// const SignInLayout = styled(FlexColmunCenter)`
 //   gap: 1rem;
 // `;
 
-const SignInLayout = styled(FlexCenterLayout)`
+const SignInLayout = styled(FlexColmunCenter)`
   gap: 1rem;
 `;
 

@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
 import { CustomButton } from '../components/common/UI/CustomButton';
 import { CustomForm } from '../components/common/UI/CustomForm';
 import { CustomInput } from '../components/common/UI/CustomInput';
-import { FlexCenterLayout } from '../components/common/UI/Layout';
+import { FlexColmunCenter } from '../components/common/UI/Layout';
 import { Title } from './signin';
 import { ErrorMessage } from '../components/common/UI/ErrorMessage';
 import { SignUpProps } from '../types/UserProps';
@@ -42,8 +42,6 @@ function SignUp() {
         profilePicPath: 'https://api.lorem.space/image/face?w=150&h=220',
         uid: signUpResponse.user.uid,
       });
-
-      //TODO : login persistence
 
       await setPersistence(auth, browserLocalPersistence);
 
@@ -133,7 +131,7 @@ const GoBackButton = styled.button`
   background-color: #fff;
 `;
 
-const SignUpLayout = styled(FlexCenterLayout)`
+const SignUpLayout = styled(FlexColmunCenter)`
   gap: 1.4rem;
   overflow-y: hidden;
 `;

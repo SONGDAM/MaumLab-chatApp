@@ -1,6 +1,5 @@
 import { type DocumentData } from 'firebase/firestore';
 
-//TODO : Semantic tag
 export interface ChatMessageProps extends DocumentData {
   text: string;
   createdAt: {

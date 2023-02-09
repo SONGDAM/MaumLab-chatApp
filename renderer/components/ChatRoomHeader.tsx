@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import React from 'react';
 import { colorPalatte } from './common/UI/color';
 
-function ChatRoomHeader() {
+function ChatRoomHeader({ chatMember }) {
   return <ChatRoomHeaderWrapper>ChatRoomHeader</ChatRoomHeaderWrapper>;
 }
 

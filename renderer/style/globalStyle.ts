@@ -137,4 +137,9 @@ export const globalStyle = css`
     border-collapse: collapse;
     border-spacing: 0;
   }
+
+  button {
+    background-color: none;
+    border: none;
+  }
 `;
