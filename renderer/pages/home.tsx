@@ -1,26 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { NextRouter, useRouter } from 'next/router';
 import styled from '@emotion/styled';
 import Image from 'next/image';
-import { auth } from '../firebaseConfig';
-import ChatRoom from '../components/ChatRoom';
 import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import UserMenuHeader from '../components/UserMenuHeader';
 import UserList from '../components/UserList';
+import ChatRoom from '../components/ChatRoom';
 import ChatRoomList from '../components/ChatRoomList';
+
+import { FlexCenter, FlexColmunCenter } from '../components/common/UI/Layout';
+import CustomModal from '../components/common/UI/CustomModal';
+import { colorPalatte } from '../style/color';
 
 import User from '../assets/user.svg';
 import Logout from '../assets/logout.svg';
 import Chat from '../assets/chat.svg';
-
-import { FlexCenter, FlexColmunCenter } from '../components/common/UI/Layout';
-import { colorPalatte } from '../components/common/UI/color';
-import CustomModal from '../components/common/UI/CustomModal';
+import type { UserProps } from '../types/UserProps';
 
 function Home() {
   const [chatMember, setChatMember] = useState([]);
   const [isChatRoomListMenu, setIsChatRoomListMenu] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatRoomOpen, setIsChatRoomOpen] = useState(false);
+  const [isCreateGroupChat, setIsCreateGroupChat] = useState(false);
   const router: NextRouter = useRouter();
   const uid = auth?.currentUser?.uid;
 
@@ -32,29 +35,62 @@ function Home() {
     });
   }, [router]);
 
-  const getChatRoomMember = (newMember: [], currentMember: []): void => {
-    setIsOpen((prev) => !prev);
-    setChatMember([newMember, currentMember]);
-  };
+  const getChatRoomMember = useCallback(
+    (member: UserProps, currentUser: UserProps): void => {
+      isCreateGroupChat ? null : setIsOpen((prev) => !prev);
 
-  const handleTabMenu = (): void => {
-    setIsChatRoomListMenu((prev) => !prev);
-  };
+      setChatMember((prev) => {
+        const members = new Set(prev);
+
+        members.add(member);
+        members.add(currentUser);
+
+        return Array.from(members);
+      });
+    },
+    [isCreateGroupChat]
+  );
 
   const loadChatRoom = (): void => {
     setIsChatRoomOpen(true);
     setIsOpen((prev) => !prev);
   };
 
-  const handleChatRoom = (member): void => {
+  const getChatRoom = useCallback((member): void => {
     setIsChatRoomOpen(true);
-    setChatMember(member);
+
+    setChatMember((prev) => {
+      const members = new Set(prev);
+
+      members.add(member);
+
+      return Array.from(members).flat();
+    });
+  }, []);
+
+  const handleGroupChatRoom = () => {
+    setIsChatRoomOpen(true);
+    setIsCreateGroupChat(false);
+  };
+
+  const handleCreateGroupChat = (): void => {
+    setIsCreateGroupChat(false);
+  };
+
+  const handleTabMenu = (): void => {
+    setChatMember([]);
+    setIsChatRoomListMenu((prev) => !prev);
   };
 
   const handleModal = (): void => {
     setIsOpen((prev) => !prev);
-    setIsChatRoomOpen((prev) => !prev);
+    setIsChatRoomOpen(false);
+    setChatMember([]);
   };
+
+  const signOut = (): Promise<void> => auth.signOut();
+
+  const groupChatMemberName = chatMember.length >= 3 ? chatMember.map((it) => it.name).join(',') : null;
 
   const modalUserContent = chatMember
     .filter((it) => it.uid !== uid)
@@ -65,27 +101,38 @@ function Home() {
       </ModalUserItem>
     ));
 
-  const signOut = (): Promise<void> => auth.signOut();
+  console.log(chatMember);
 
   return (
     <>
       <HomeLayout>
         <MenuLayout>
-          {isChatRoomListMenu ? (
-            <ChatRoomList chatMember={chatMember} handleChatRoom={handleChatRoom} />
-          ) : (
-            <UserList getChatRoomMember={getChatRoomMember} />
+          <UserMenuHeader handleCreateGroupChat={handleCreateGroupChat} isChatRoomListMenu={isChatRoomListMenu} />
+          {isCreateGroupChat && (
+            <GroupChatUserBox>
+              {groupChatMemberName}
+              <GroupChatButtonWrapper>
+                <GroupChatSubmitButton onClick={handleGroupChatRoom}>추가</GroupChatSubmitButton>
+                <GroupChatCancelButton onClick={handleCreateGroupChat}>취소</GroupChatCancelButton>
+              </GroupChatButtonWrapper>
+            </GroupChatUserBox>
           )}
 
           <UserMenuTab>
             {isChatRoomListMenu ? (
-              <ChatListButton onClick={handleTabMenu}>
-                <Image src={User} alt='show user' width={20} height={20} />
-              </ChatListButton>
+              <>
+                <ChatRoomList getChatRoom={getChatRoom} />
+                <ChatListButton onClick={handleTabMenu}>
+                  <Image src={User} alt='show user' width={20} height={20} />
+                </ChatListButton>
+              </>
             ) : (
-              <UserListButton onClick={handleTabMenu}>
-                <Image src={Chat} alt='show chat list' width={20} height={20} />
-              </UserListButton>
+              <>
+                <UserList getChatRoomMember={getChatRoomMember} />
+                <UserListButton onClick={handleTabMenu}>
+                  <Image src={Chat} alt='show chat list' width={20} height={20} />
+                </UserListButton>
+              </>
             )}
             <SignOutButton onClick={signOut}>
               <Image src={Logout} alt='show chat list' width={20} height={20} />
@@ -93,20 +140,22 @@ function Home() {
           </UserMenuTab>
         </MenuLayout>
 
-        {isChatRoomOpen ? (
+        {isChatRoomOpen && (
           <ChatRoomLayout>
             <ChatRoom chatMember={chatMember} />
           </ChatRoomLayout>
-        ) : null}
+        )}
       </HomeLayout>
 
-      <CustomModal isOpen={isOpen}>
-        {modalUserContent}
-        <ModalButtonGroup>
-          <ChatSubmitButton onClick={loadChatRoom}>채팅하기</ChatSubmitButton>
-          <CancelButton onClick={handleModal}>취소하기</CancelButton>
-        </ModalButtonGroup>
-      </CustomModal>
+      {chatMember.length === 2 ? (
+        <CustomModal isOpen={isOpen}>
+          {modalUserContent}
+          <ModalButtonGroup>
+            <ChatSubmitButton onClick={loadChatRoom}>채팅하기</ChatSubmitButton>
+            <CancelButton onClick={handleModal}>취소하기</CancelButton>
+          </ModalButtonGroup>
+        </CustomModal>
+      ) : null}
     </>
   );
 }
@@ -117,25 +166,56 @@ const HomeLayout = styled(FlexColmunCenter)`
 
 const MenuLayout = styled.aside`
   flex: 1;
+
   height: 100vh;
   border-right: 1px solid #e2e2dc;
+`;
+
+const GroupChatUserBox = styled(FlexCenter)`
+  flex-wrap: wrap;
+  position: absolute;
+  top: 0;
+  left: 16rem;
+  width: 16.6rem;
+  height: 12rem;
+  padding: 2.2rem 0 1rem 0;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+  z-index: 1;
+`;
+
+const GroupChatButtonWrapper = styled(FlexCenter)`
+  gap: 1rem;
+`;
+
+const GroupChatSubmitButton = styled.button`
+  align-self: flex-end;
+  margin-bottom: 1rem;
+  background-color: ${colorPalatte.primary};
+  width: 4rem;
+  height: 2.6rem;
+  border-radius: 12px;
+  color: #fff;
+`;
+
+const GroupChatCancelButton = styled(GroupChatSubmitButton)`
+  background-color: #eb455f;
+  color: #fff;
+`;
+
+const UserMenuTab = styled(FlexCenter)`
+  justify-content: space-between;
+  width: 16.6rem;
+  height: 3rem;
+  position: fixed;
+  bottom: 0;
+  background-color: ${colorPalatte.primary};
 `;
 
 const ChatRoomLayout = styled.main`
   flex: 28rem;
   height: 100vh;
-`;
-
-const UserMenuTab = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 16.2rem;
-  height: 3rem;
-  position: fixed;
-  bottom: 0;
-  background-color: ${colorPalatte.primary};
 `;
 
 const UserListButton = styled.button`

@@ -1,4 +1,4 @@
-import styled, { StyledComponent } from '@emotion/styled';
+import styled from '@emotion/styled';
 
 export const FlexColmunCenter = styled.div`
   display: flex;

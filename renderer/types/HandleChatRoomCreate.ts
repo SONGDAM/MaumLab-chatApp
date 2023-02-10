@@ -1,3 +1,3 @@
-export type getChatRoomMember = {
+export type GetChatRoomMember = {
   getChatRoomMember: (newMemeber, currentUser) => void;
 };

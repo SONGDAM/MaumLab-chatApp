@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { NextRouter, useRouter } from 'next/router';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { auth } from '../firebaseConfig';
 import { inMemoryPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
@@ -11,7 +12,6 @@ import { CustomInput } from '../components/common/UI/CustomInput';
 import { CustomButton } from '../components/common/UI/CustomButton';
 import { CustomForm } from '../components/common/UI/CustomForm';
 import { ErrorMessage } from '../components/common/UI/ErrorMessage';
-import { NextRouter, useRouter } from 'next/router';
 
 function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -84,10 +84,6 @@ function SignIn() {
     </SignInLayout>
   );
 }
-
-// const SignInLayout = styled(FlexColmunCenter)`
-//   gap: 1rem;
-// `;
 
 const SignInLayout = styled(FlexColmunCenter)`
   gap: 1rem;

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colorPalatte } from './color';
+import { colorPalatte } from '../../../style/color';
 
 export const CustomButton = styled.button`
   margin-bottom: 1rem;

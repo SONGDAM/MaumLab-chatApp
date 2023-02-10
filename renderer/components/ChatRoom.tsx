@@ -1,35 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { auth, database } from '../firebaseConfig';
-import {
-  addDoc,
-  collection,
-  doc,
-  DocumentData,
-  limit,
-  onSnapshot,
-  orderBy,
-  Query,
-  query,
-  QuerySnapshot,
-  serverTimestamp,
-  setDoc,
-  Unsubscribe,
-} from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import styled from '@emotion/styled';
+import useGetFirebaseQuery from '../hooks/useGetFirebaseQuery';
 
-import { colorPalatte } from './common/UI/color';
+import { colorPalatte } from '../style/color';
 import { FlexColmunCenter } from './common/UI/Layout';
-import ChatRoomHeader from './ChatRoomHeader';
 import ChatMessageInput from './ChatMessageInput';
 import type { ChatMessageProps } from '../types/ChatMessageProps';
 import type { UserProps } from '../types/UserProps';
 
-interface ChatRoomProps {
+interface ChatRoomLocalProps {
   chatMember: UserProps[];
 }
 
-function ChatRoom({ chatMember }: ChatRoomProps) {
-  const [lastMessage, setLastMessage] = useState<ChatMessageProps[]>([]);
+function ChatRoom({ chatMember }: ChatRoomLocalProps) {
   const [newMessage, setNewMessage] = useState<string>('');
   const uid: string = auth?.currentUser?.uid;
   const messageListBottomRef = useRef<HTMLDivElement>();
@@ -43,36 +28,14 @@ function ChatRoom({ chatMember }: ChatRoomProps) {
     .sort()
     .join(',');
 
-  useEffect(() => {
-    const chatRoomDatabaseName: string = chatMember
-      .map((it) => it.uid)
-      .sort()
-      .join('');
-
-    const messageQuery: Query<DocumentData> = query(
-      collection(database, `message=${chatRoomDatabaseName}`),
-      orderBy('createdAt'),
-      limit(100)
-    );
-
-    const unsubscribe: Unsubscribe = onSnapshot(messageQuery, (QuerySnapshot: QuerySnapshot) => {
-      const messages = [];
-
-      QuerySnapshot.forEach((doc) => {
-        messages.push({ ...doc.data(), id: doc.id });
-      });
-
-      setLastMessage(messages);
-    });
-
-    return () => unsubscribe();
-  }, [chatMember]);
+  const messageQueryResult: ChatMessageProps[] = useGetFirebaseQuery(`message=${chatRoomDatabaseName}`, 'createdAt');
 
   const createChatRoom = async (): Promise<void> => {
     await setDoc(doc(database, `chatrooms`, chatRoomDatabaseName), {
       profilePicPath: chatMember[0].profilePicPath,
       name: chatRoomMemberName,
       createdAt: serverTimestamp(),
+      recentMessage: newMessage,
       member: chatMember,
       own: uid,
     });
@@ -105,9 +68,8 @@ function ChatRoom({ chatMember }: ChatRoomProps) {
   return (
     <>
       <FlexColmunCenter>
-        <ChatRoomHeader chatMember={chatMember} />
         <ChatRoomMessage>
-          {lastMessage.map((it) =>
+          {messageQueryResult.map((it) =>
             it.own === uid ? (
               <React.Fragment key={it.id}>
                 <ChatBoxWrapper key={it.id}>
