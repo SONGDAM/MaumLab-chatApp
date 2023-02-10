@@ -1,10 +1,10 @@
-import styled from '@emotion/styled';
 import { useState } from 'react';
 import Link from 'next/link';
 import { NextRouter, useRouter } from 'next/router';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { auth } from '../firebaseConfig';
 import { inMemoryPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
+import styled from '@emotion/styled';
 import { SignUpProps } from '../types/UserProps';
 
 import { FlexColmunCenter } from '../components/common/UI/Layout';

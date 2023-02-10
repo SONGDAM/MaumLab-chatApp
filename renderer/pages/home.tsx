@@ -8,6 +8,7 @@ import UserMenuHeader from '../components/UserMenuHeader';
 import UserList from '../components/UserList';
 import ChatRoom from '../components/ChatRoom';
 import ChatRoomList from '../components/ChatRoomList';
+import type { UserProps } from '../types/UserProps';
 
 import { FlexCenter, FlexColmunCenter } from '../components/common/UI/Layout';
 import CustomModal from '../components/common/UI/CustomModal';
@@ -16,7 +17,6 @@ import { colorPalatte } from '../style/color';
 import User from '../assets/user.svg';
 import Logout from '../assets/logout.svg';
 import Chat from '../assets/chat.svg';
-import type { UserProps } from '../types/UserProps';
 
 function Home() {
   const [chatMember, setChatMember] = useState([]);
@@ -51,11 +51,6 @@ function Home() {
     [isCreateGroupChat]
   );
 
-  const loadChatRoom = (): void => {
-    setIsChatRoomOpen(true);
-    setIsOpen((prev) => !prev);
-  };
-
   const getChatRoom = useCallback((member): void => {
     setIsChatRoomOpen(true);
 
@@ -67,6 +62,11 @@ function Home() {
       return Array.from(members).flat();
     });
   }, []);
+
+  const loadChatRoom = (): void => {
+    setIsChatRoomOpen(true);
+    setIsOpen((prev) => !prev);
+  };
 
   const handleGroupChatRoom = () => {
     setIsChatRoomOpen(true);

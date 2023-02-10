@@ -1,14 +1,16 @@
 import React, { useRef, useState } from 'react';
-import { auth, database } from '../firebaseConfig';
-import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { auth } from '../firebaseConfig';
+import { serverTimestamp } from 'firebase/firestore';
 import styled from '@emotion/styled';
 import useGetFirebaseQuery from '../hooks/useGetFirebaseQuery';
+import createFirebaseDocument from './common/util/createFirebaseDocument';
+import updateFirebaseDocument from './common/util/updateFirebaseDocument';
+import type { UserProps } from '../types/UserProps';
+import type { ChatMessageProps } from '../types/ChatMessageProps';
 
 import { colorPalatte } from '../style/color';
 import { FlexColmunCenter } from './common/UI/Layout';
 import ChatMessageInput from './ChatMessageInput';
-import type { ChatMessageProps } from '../types/ChatMessageProps';
-import type { UserProps } from '../types/UserProps';
 
 interface ChatRoomLocalProps {
   chatMember: UserProps[];
@@ -30,8 +32,21 @@ function ChatRoom({ chatMember }: ChatRoomLocalProps) {
 
   const messageQueryResult: ChatMessageProps[] = useGetFirebaseQuery(`message=${chatRoomDatabaseName}`, 'createdAt');
 
-  const createChatRoom = async (): Promise<void> => {
-    await setDoc(doc(database, `chatrooms`, chatRoomDatabaseName), {
+  const handleNewMessage = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
+    setNewMessage(e.target.value);
+  };
+
+  const sendNewMessage = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+
+    createFirebaseDocument(`message=${chatRoomDatabaseName}`, {
+      text: newMessage,
+      createdAt: serverTimestamp(),
+      memberName: chatRoomMemberName,
+      own: uid,
+    });
+
+    updateFirebaseDocument(`chatrooms`, chatRoomDatabaseName, {
       profilePicPath: chatMember[0].profilePicPath,
       name: chatRoomMemberName,
       createdAt: serverTimestamp(),
@@ -39,24 +54,6 @@ function ChatRoom({ chatMember }: ChatRoomLocalProps) {
       member: chatMember,
       own: uid,
     });
-  };
-
-  const handleNewMessage = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
-    setNewMessage(e.target.value);
-  };
-
-  const sendNewMessage = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-
-    await addDoc(collection(database, `message=${chatRoomDatabaseName}`), {
-      text: newMessage,
-      createdAt: serverTimestamp(),
-      memberName: chatRoomMemberName,
-      member: chatMember,
-      own: uid,
-    });
-
-    createChatRoom();
 
     setTimeout(() => {
       messageListBottomRef.current.scrollIntoView({ behavior: 'smooth' });

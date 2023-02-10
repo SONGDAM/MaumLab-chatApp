@@ -21,6 +21,7 @@ import { SignUpProps } from '../types/UserProps';
 import { addDoc, collection } from 'firebase/firestore';
 import { NextRouter, useRouter } from 'next/router';
 import Back from '../assets/left-arrow.svg';
+import createFirebaseDocument from '../components/common/util/createFirebaseDocument';
 
 function SignUp() {
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -36,7 +37,7 @@ function SignUp() {
     try {
       const signUpResponse = await createUserWithEmailAndPassword(auth, userCredential.email, userCredential.password);
 
-      await addDoc(collection(database, 'users'), {
+      createFirebaseDocument('users', {
         name: userCredential.name,
         email: userCredential.email,
         profilePicPath: 'https://api.lorem.space/image/face?w=150&h=220',
