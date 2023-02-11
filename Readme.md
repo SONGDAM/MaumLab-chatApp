@@ -2,7 +2,7 @@
 
 <br />
 
-> .envTest => .env
+> ./renderer.envTest -> .env
 >
 > yarn <br/>
 > yarn dev
