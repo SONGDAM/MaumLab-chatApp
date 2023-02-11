@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { NextRouter, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import styled from '@emotion/styled';
 import Image from 'next/image';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -19,12 +19,12 @@ import Logout from '../assets/logout.svg';
 import Chat from '../assets/chat.svg';
 
 function Home() {
-  const [chatMember, setChatMember] = useState([]);
+  const [chatMember, setChatMember] = useState<UserProps[]>([]);
   const [isChatRoomListMenu, setIsChatRoomListMenu] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatRoomOpen, setIsChatRoomOpen] = useState(false);
   const [isCreateGroupChat, setIsCreateGroupChat] = useState(false);
-  const router: NextRouter = useRouter();
+  const router = useRouter();
   const uid = auth?.currentUser?.uid;
 
   useEffect(() => {
@@ -36,7 +36,7 @@ function Home() {
   }, [router]);
 
   const getChatRoomMember = useCallback(
-    (member: UserProps, currentUser: UserProps): void => {
+    (member: UserProps, currentUser: UserProps) => {
       isCreateGroupChat ? null : setIsOpen((prev) => !prev);
 
       setChatMember((prev) => {
@@ -51,7 +51,7 @@ function Home() {
     [isCreateGroupChat]
   );
 
-  const getChatRoom = useCallback((member): void => {
+  const getChatRoom = useCallback((member: UserProps) => {
     setIsChatRoomOpen(true);
 
     setChatMember((prev) => {
@@ -63,7 +63,7 @@ function Home() {
     });
   }, []);
 
-  const loadChatRoom = (): void => {
+  const loadChatRoom = () => {
     setIsChatRoomOpen(true);
     setIsOpen((prev) => !prev);
   };
@@ -73,22 +73,22 @@ function Home() {
     setIsCreateGroupChat(false);
   };
 
-  const handleCreateGroupChat = (): void => {
+  const handleCreateGroupChat = () => {
     setIsCreateGroupChat(false);
   };
 
-  const handleTabMenu = (): void => {
+  const handleTabMenu = () => {
     setChatMember([]);
     setIsChatRoomListMenu((prev) => !prev);
   };
 
-  const handleModal = (): void => {
+  const handleModal = () => {
     setIsOpen((prev) => !prev);
     setIsChatRoomOpen(false);
     setChatMember([]);
   };
 
-  const signOut = (): Promise<void> => auth.signOut();
+  const signOut = () => auth.signOut();
 
   const groupChatMemberName = chatMember.length >= 3 ? chatMember.map((it) => it.name).join(',') : null;
 
@@ -100,8 +100,6 @@ function Home() {
         <p key={it.uid}>{it?.name}</p>
       </ModalUserItem>
     ));
-
-  console.log(chatMember);
 
   return (
     <>

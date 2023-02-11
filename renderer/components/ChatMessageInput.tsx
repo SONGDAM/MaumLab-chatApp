@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { CustomButton } from './common/UI/CustomButton';
 import { CustomForm } from './common/UI/CustomForm';
+import { FlexCenter } from './common/UI/Layout';
 
 interface ChatInputProps {
   handleNewMessage: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -23,14 +24,10 @@ function ChatMessageInput({ handleNewMessage, sendNewMessage, newMessage }: Chat
 
 const ChatMessageInputForm = styled(CustomForm)`
   position: fixed;
-  /* bottom: 0.2rem; */
   bottom: 0;
 `;
 
-const ChatInputWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+const ChatInputWrapper = styled(FlexCenter)`
   gap: 1rem;
   background-color: #fff;
   width: 46rem;

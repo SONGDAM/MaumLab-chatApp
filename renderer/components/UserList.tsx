@@ -1,26 +1,18 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import styled from '@emotion/styled';
-import { type GetChatRoomMember } from '../types/HandleChatRoomCreate';
 import Image from 'next/image';
+
+import useGetFirebaseQuery from '../hooks/useGetFirebaseQuery';
 import { auth } from '../firebaseConfig';
 import { FlexColmunCenter } from './common/UI/Layout';
-import { onAuthStateChanged } from 'firebase/auth';
-import { UserProps } from '../types/UserProps';
-import useGetFirebaseQuery from '../hooks/useGetFirebaseQuery';
+
+import type { UserProps } from '../types/UserProps';
+import type { GetChatRoomMember } from '../types/HandleChatRoomCreate';
 
 type QueryResult = UserProps[];
 
 function UserList({ getChatRoomMember }: GetChatRoomMember) {
   const uid = auth?.currentUser?.uid;
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log(user);
-      }
-    });
-  }, []);
-
   const userQueryResult: QueryResult = useGetFirebaseQuery('users', 'name');
 
   const currentUser = useMemo(() => userQueryResult.find((u) => u.uid === uid), [uid, userQueryResult]);

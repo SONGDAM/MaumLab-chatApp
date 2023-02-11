@@ -12,7 +12,6 @@ interface ChatRoomListProps {
 function ChatRoomList({ getChatRoom }: ChatRoomListProps) {
   const uid = auth?.currentUser?.uid;
   const chatListQueryResult: ChatRoomProps[] = useGetFirebaseQuery(`chatrooms`, 'name');
-
   const chatRooms = chatListQueryResult.map((it) => it);
 
   const myRooms = chatRooms.filter((it) => {

@@ -1,3 +1,5 @@
+import { UserProps } from './UserProps';
+
 export type GetChatRoomMember = {
-  getChatRoomMember: (newMemeber, currentUser) => void;
+  getChatRoomMember: (newMemeber: UserProps, currentUser: UserProps) => void;
 };

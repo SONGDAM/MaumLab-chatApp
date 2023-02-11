@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import Link from 'next/link';
 import { NextRouter, useRouter } from 'next/router';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { auth } from '../firebaseConfig';
 import { inMemoryPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
 import styled from '@emotion/styled';
-import { SignUpProps } from '../types/UserProps';
+
+import useInputValidation from '../hooks/useInputValidation';
+import { auth } from '../firebaseConfig';
 
 import { FlexColmunCenter } from '../components/common/UI/Layout';
 import { CustomInput } from '../components/common/UI/CustomInput';
@@ -14,20 +13,21 @@ import { CustomForm } from '../components/common/UI/CustomForm';
 import { ErrorMessage } from '../components/common/UI/ErrorMessage';
 
 function SignIn() {
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage, handleChange, formData] = useInputValidation(
+    {
+      email: '',
+      password: '',
+    },
+    false
+  );
   const router: NextRouter = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpProps>();
-
-  const onSubmit: SubmitHandler<SignUpProps> = async (userCredential) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     try {
+      e.preventDefault();
       await setPersistence(auth, inMemoryPersistence);
 
-      const signInResponse = await signInWithEmailAndPassword(auth, userCredential.email, userCredential.password);
+      const signInResponse = await signInWithEmailAndPassword(auth, formData.email, formData.password);
 
       if (signInResponse) {
         router.push('/home');
@@ -48,36 +48,22 @@ function SignIn() {
     <SignInLayout>
       <Title>MaumLab-ChatApp</Title>
 
-      <CustomForm onSubmit={handleSubmit(onSubmit)}>
-        <CustomInput
-          placeholder='이메일'
-          {...register('email', {
-            required: true,
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: '올바르지 않은 이메일 주소입니다',
-            },
-          })}
-        />
+      <CustomForm onSubmit={handleSubmit}>
+        <CustomInput name='email' placeholder='이메일' value={formData.email} onChange={handleChange} />
 
         <CustomInput
-          type={'password'}
+          type='password'
+          name='password'
           placeholder='비밀번호'
-          {...register('password', {
-            required: true,
-            maxLength: 20,
-            pattern: {
-              value: /^[A-Za-z0-9]{6,12}$/,
-              message: '올바르지 않은 비밀번호 구성입니다.',
-            },
-          })}
+          value={formData.password}
+          onChange={handleChange}
         />
 
-        {errors.email && <ErrorMessage>올바르지 않은 이메일 주소입니다.</ErrorMessage>}
         <ErrorMessage>{errorMessage}</ErrorMessage>
 
         <CustomButton type='submit'>로그인</CustomButton>
       </CustomForm>
+
       <Link href={'/signup'}>
         <SignUpComment>아직 계정이 없으신가요? 회원가입하기</SignUpComment>
       </Link>

@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import styled from '@emotion/styled';
-import { useForm, SubmitHandler } from 'react-hook-form';
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
   setPersistence,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth, database } from '../firebaseConfig';
+import { auth } from '../firebaseConfig';
+import createFirebaseDocument from '../components/common/util/createFirebaseDocument';
+import useInputValidation from '../hooks/useInputValidation';
 import Swal from 'sweetalert2';
 
 import { CustomButton } from '../components/common/UI/CustomButton';
@@ -17,36 +19,36 @@ import { CustomInput } from '../components/common/UI/CustomInput';
 import { FlexColmunCenter } from '../components/common/UI/Layout';
 import { Title } from './signin';
 import { ErrorMessage } from '../components/common/UI/ErrorMessage';
-import { SignUpProps } from '../types/UserProps';
-import { addDoc, collection } from 'firebase/firestore';
-import { NextRouter, useRouter } from 'next/router';
 import Back from '../assets/left-arrow.svg';
-import createFirebaseDocument from '../components/common/util/createFirebaseDocument';
 
 function SignUp() {
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const router: NextRouter = useRouter();
+  const [errorMessage, setErrorMessage, handleChange, formData] = useInputValidation(
+    {
+      name: '',
+      email: '',
+      password: '',
+    },
+    true
+  );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpProps>();
+  const router = useRouter();
 
-  const onSubmit: SubmitHandler<SignUpProps> = async (userCredential) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     try {
-      const signUpResponse = await createUserWithEmailAndPassword(auth, userCredential.email, userCredential.password);
+      e.preventDefault();
+
+      const signUpResponse = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
 
       createFirebaseDocument('users', {
-        name: userCredential.name,
-        email: userCredential.email,
+        name: formData.name,
+        email: formData.email,
         profilePicPath: 'https://api.lorem.space/image/face?w=150&h=220',
         uid: signUpResponse.user.uid,
       });
 
       await setPersistence(auth, browserLocalPersistence);
 
-      await signInWithEmailAndPassword(auth, userCredential.email, userCredential.password);
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
 
       const signUpSuccessModal = await Swal.fire({
         icon: 'success',
@@ -81,35 +83,18 @@ function SignUp() {
       <SignUpLayout>
         <Title>Join Us</Title>
 
-        <CustomForm onSubmit={handleSubmit(onSubmit)}>
-          <CustomInput placeholder='이름' {...register('name', { required: true, maxLength: 20 })} />
-          {errors.name && <ErrorMessage>이름을 입력해주세요.</ErrorMessage>}
+        <CustomForm onSubmit={handleSubmit}>
+          <CustomInput placeholder='이름' name='name' value={formData.name} onChange={handleChange} />
 
-          <CustomInput
-            placeholder='이메일'
-            {...register('email', {
-              required: true,
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: '올바르지 않은 이메일 주소입니다',
-              },
-            })}
-          />
-          {errors.email && <ErrorMessage>올바르지 않은 이메일 주소입니다.</ErrorMessage>}
+          <CustomInput placeholder='이메일' name='email' value={formData.email} onChange={handleChange} />
 
           <CustomInput
             placeholder='비밀번호(6~12자리,한 개 이상의 영문자, 숫자로 입력해주세요)'
-            {...register('password', {
-              required: true,
-              maxLength: 20,
-              pattern: {
-                value: /^[A-Za-z0-9]{6,12}$/,
-                message: '올바르지 않은 비밀번호 구성입니다.',
-              },
-            })}
+            name='password'
             type='password'
+            value={formData.password}
+            onChange={handleChange}
           />
-          {errors.password && <ErrorMessage>올바르지 않은 비밀번호입니다.</ErrorMessage>}
 
           <ErrorMessage>{errorMessage}</ErrorMessage>
 
