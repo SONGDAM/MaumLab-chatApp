@@ -74,7 +74,7 @@ function Home() {
   };
 
   const handleCreateGroupChat = () => {
-    setIsCreateGroupChat(false);
+    setIsCreateGroupChat(true);
   };
 
   const handleTabMenu = () => {
