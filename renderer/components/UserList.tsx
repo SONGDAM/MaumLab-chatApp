@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
 import styled from '@emotion/styled';
 import Image from 'next/image';
-
 import useGetFirebaseQuery from '../hooks/useGetFirebaseQuery';
 import { auth } from '../firebaseConfig';
 import { FlexColmunCenter } from './common/UI/Layout';
-
 import type { UserProps } from '../types/UserProps';
 import type { GetChatRoomMember } from '../types/HandleChatRoomCreate';
 

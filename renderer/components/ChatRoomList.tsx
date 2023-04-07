@@ -37,7 +37,7 @@ const UserListLayout = styled(FlexColmunCenter)`
 `;
 
 const ChatRoomListItem = styled(FlexCenter)`
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   font-size: 1rem;
   padding: 1rem 1rem 1rem 2rem;
   gap: 2rem;
